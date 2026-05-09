@@ -1,0 +1,41 @@
+{
+    "name": "happ-manager-api",
+    "version": "0.1.0",
+    "description": "Minimal starter package.json for the happ-manager API",
+    "private": true,
+    "type": "module",
+    "main": "src/index.js",
+    "scripts": {
+        "start": "node ./src/index.js",
+        "dev": "nodemon --watch src --exec \"node --enable-source-maps ./src/index.js\"",
+        "build": "echo \"No build step configured\"",
+        "test": "jest",
+        "lint": "eslint . --ext .js,.mjs"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/your-org/happ-manager-api.git"
+    },
+    "keywords": [
+        "happ",
+        "api",
+        "manager"
+    ],
+    "author": "",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/your-org/happ-manager-api/issues"
+    },
+    "homepage": "https://github.com/your-org/happ-manager-api#readme",
+    "engines": {
+        "node": ">=16"
+    },
+    "dependencies": {
+        "express": "^4.18.2"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.22",
+        "eslint": "^8.45.0",
+        "jest": "^29.7.0"
+    }
+}
