@@ -1,11 +1,6 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
-// Development datasource: SQLite (local file)
-datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+datasource db_mysql {
+  provider = "mysql"
+  url      = env("DATABASE_URL_MYSQL")
 }
 
 model User {

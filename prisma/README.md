@@ -2,32 +2,35 @@ Prisma
 
 Este diretório contém o schema do Prisma para o projeto `happ-manager-api`.
 
-Passos para usar:
+Passos para usar (multi-environment):
 
-1. Copie o `.env.prisma.example` para `.env` (ou adicione uma `DATABASE_URL` apropriada no `.env` do projeto):
+1. Copie o `.env.prisma.example` para `.env`:
 
    cp .env.prisma.example .env
 
-2. Instale dependências (localmente):
+2. Instale dependências:
 
    npm install
 
-3. Gere o client do Prisma:
+3. Desenvolvimento (SQLite)
 
-   npx prisma generate
+   - O arquivo `prisma/schema.prisma` está configurado para usar SQLite por padrão. Para gerar client e aplicar o schema:
 
-4. Para aplicar o schema ao banco (desenvolvimento):
+     npx prisma generate
+     npx prisma migrate dev --schema=prisma/schema.prisma --name init
 
-   npx prisma migrate dev --name init
+4. Migrations / Produção (MySQL)
 
-   ou, para apenas sincronizar sem criar migration files:
+   - Para trabalhar com MySQL (gerar/aplicar migrations), use o schema alternativo `prisma/schema.mysql.prisma` e a variável `DATABASE_URL_MYSQL`:
 
-   npx prisma db push
+     # set DATABASE_URL_MYSQL in env or CI
+     npx prisma generate --schema=prisma/schema.mysql.prisma
+     npx prisma migrate dev --schema=prisma/schema.mysql.prisma --name init
 
-5. Abra o Prisma Studio para inspecionar dados:
+5. Prisma Studio (apontará para o datasource do schema usado):
 
-   npx prisma studio
+   npx prisma studio --schema=prisma/schema.prisma
 
 Observações:
-- O arquivo `schema.prisma` mapeia o modelo inicial baseado no script SQL em `db/001_create_base_schema.sql`.
-- Em produção, prefira criar migrations e usar ferramentas CI para aplicar mudanças com segurança.
+- Use SQLite localmente para rapidez e simplicidade. Use MySQL schema for migrations/production.
+- Quando gerar migrations para MySQL, execute commands with `--schema=prisma/schema.mysql.prisma` and ensure `DATABASE_URL_MYSQL` is set.
