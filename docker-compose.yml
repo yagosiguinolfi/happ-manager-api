@@ -1,0 +1,23 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: happ_manager_api_db
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL
+    ports:
+      - "${MYSQL_PORT}:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  db_data:
+    name: happ_manager_api_db_data

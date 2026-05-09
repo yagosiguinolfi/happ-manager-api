@@ -1,0 +1,159 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Model definitions mapped from the SQL schema
+model User {
+  id           BigInt    @id @default(autoincrement())
+  uuid         String    @unique @db.Char(36)
+  name         String?   @db.VarChar(255)
+  email        String?   @db.VarChar(255)
+  passwordHash String?   @db.VarChar(255)
+  settings     Json?
+  accounts     Account[]
+  categories   Category[]
+  transactions Transaction[]
+  incomes      Income[]
+  fixedBills   FixedBill[]
+  variableBills VariableBill[]
+  customFields CustomField[]
+  schedules    Schedule[]
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+}
+
+model Account {
+  id        BigInt   @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    BigInt
+  name      String   @db.VarChar(255)
+  currency  String   @db.Char(3) @default("BRL")
+  balance   Decimal  @db.Decimal(15, 2) @default("0.00")
+  metadata  Json?
+  transactions Transaction[]
+  incomes    Income[]
+  fixedBills FixedBill[]
+  variableBills VariableBill[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+model Category {
+  id        BigInt   @id @default(autoincrement())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId    BigInt?
+  name      String   @db.VarChar(255)
+  type      String   @db.VarChar(10)
+  color     String?  @db.VarChar(7)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  transactions Transaction[]
+}
+
+model Transaction {
+  id          BigInt   @id @default(autoincrement())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      BigInt
+  account     Account? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  accountId   BigInt?
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryId  BigInt?
+  type        String   @db.VarChar(10)
+  amount      Decimal  @db.Decimal(15, 2)
+  occurredAt  DateTime @map("occurred_at")
+  description String?  @db.Text
+  metadata    Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+}
+
+model Income {
+  id             BigInt   @id @default(autoincrement())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         BigInt
+  account        Account? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  accountId      BigInt?
+  title          String   @db.VarChar(255)
+  amount         Decimal  @db.Decimal(15, 2)
+  recurrenceRule String?  @db.VarChar(255)
+  nextDate       DateTime? @map("next_date")
+  active         Boolean  @default(true)
+  metadata       Json?
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+}
+
+model FixedBill {
+  id             BigInt   @id @default(autoincrement())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         BigInt
+  account        Account? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  accountId      BigInt?
+  title          String   @db.VarChar(255)
+  amount         Decimal  @db.Decimal(15, 2)
+  dueDay         Int?     @map("due_day")
+  recurrenceRule String?  @db.VarChar(255)
+  nextDue        DateTime? @map("next_due")
+  active         Boolean  @default(true)
+  metadata       Json?
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+}
+
+model VariableBill {
+  id           BigInt   @id @default(autoincrement())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       BigInt
+  account      Account? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  accountId    BigInt?
+  title        String   @db.VarChar(255)
+  estimatedAmount Decimal? @db.Decimal(15, 2) @map("estimated_amount")
+  lastAmount   Decimal? @db.Decimal(15, 2) @map("last_amount")
+  lastDate     DateTime? @map("last_date")
+  metadata     Json?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+}
+
+model CustomField {
+  id         BigInt   @id @default(autoincrement())
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId     BigInt?
+  entityType String   @map("entity_type")
+  name       String   @db.VarChar(255)
+  fieldType  String   @map("field_type")
+  required   Boolean  @default(false)
+  settings   Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  values     CustomFieldValue[]
+}
+
+model CustomFieldValue {
+  id            BigInt   @id @default(autoincrement())
+  customField   CustomField @relation(fields: [customFieldId], references: [id], onDelete: Cascade)
+  customFieldId BigInt
+  entityType    String   @map("entity_type")
+  entityId      BigInt   @map("entity_id")
+  value         String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+}
+
+model Schedule {
+  id           BigInt   @id @default(autoincrement())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       BigInt
+  sourceType   String   @map("source_type")
+  sourceId     BigInt   @map("source_id")
+  scheduledFor DateTime @map("scheduled_for")
+  processed    Boolean  @default(false)
+  metadata     Json?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+}
