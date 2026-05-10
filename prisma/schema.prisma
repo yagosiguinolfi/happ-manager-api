@@ -14,7 +14,111 @@ model User {
   email     String   @unique
   password  String
   phone     String?
+  active    Boolean  @default(true) // Indicates if the user is active or has been soft-deleted
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  accounts     Account[]
+  transactions Transaction[]
+  installments Installment[]
+  reservations Reservation[]
+
   @@map("users")
+}
+
+model Account {
+  id        String   @id @default(uuid())
+  userId    String
+  balance   Decimal  @default("0.00")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  transactions Transaction[]
+  installments Installment[]
+  reservations Reservation[]
+
+  @@map("accounts")
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  type      String // "income" or "expense"
+  isFixed   Boolean  @default(false) // Indicates if the category is fixed (recurring) or variable
+  active    Boolean  @default(true) // Indicates if the category is active or has been soft-deleted
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions Transaction[]
+  installments Installment[]
+  reservations Reservation[]
+
+  @@map("categories")
+}
+
+model Transaction {
+  id                String   @id @default(uuid())
+  userId            String
+  accountId         String
+  categoryId        String
+  amount            Decimal
+  frequency         String?  @default("monthly") // "daily", "weekly", "monthly", "yearly" for recurring transactions, null for one-time transactions
+  occurredAt        DateTime
+  totalInstallments Int? // Total number of installments if this transaction is part of an installment plan
+  description       String?
+  active            Boolean  @default(true) // Indicates if the transaction is active or has been soft-deleted
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id])
+  account  Account  @relation(fields: [accountId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+
+  installments Installment[]
+
+  @@map("transactions")
+}
+
+model Installment {
+  id                String   @id @default(uuid())
+  userId            String
+  accountId         String
+  categoryId        String
+  transactionId     String // Reference to the original transaction that this installment belongs to
+  amount            Decimal // Amount for each installment
+  instalmentNumber  Int // The installment number (e.g., 1 for the first installment, 2 for the second, etc.)
+  totalInstallments Int // Total number of installments in the plan
+  description       String?
+  active            Boolean  @default(true) // Indicates if the installment plan is active or has been soft-deleted
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id])
+  account     Account     @relation(fields: [accountId], references: [id])
+  category    Category    @relation(fields: [categoryId], references: [id])
+  transaction Transaction @relation(fields: [transactionId], references: [id])
+
+  @@map("installments")
+}
+
+model Reservation {
+  id          String   @id @default(uuid())
+  userId      String
+  accountId   String
+  categoryId  String
+  amount      Decimal
+  frequency   String?  @default("monthly") // "daily", "weekly", "monthly", "yearly" for recurring reservations, null for one-time reservations
+  reservedAt  DateTime // The date when the reservation is set to occur
+  description String?
+  active      Boolean  @default(true) // Indicates if the reservation is active or has been soft-deleted
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id])
+  account  Account  @relation(fields: [accountId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@map("reservations")
 }
