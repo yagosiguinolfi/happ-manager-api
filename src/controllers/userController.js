@@ -20,7 +20,7 @@ export const create = async (req, res, next) => {
 
 export const getById = async (req, res, next) => {
   try {
-    const user = await userService.getUserById(req.params.id);
+    const user = await userService.getById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
