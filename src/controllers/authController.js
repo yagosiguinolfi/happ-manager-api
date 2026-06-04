@@ -9,7 +9,7 @@ export const login = async (req, res, next) => {
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
-    const user = await userService.getUserByEmail(email);
+    const user = await userService.getUserByEmail(email.toLowerCase());
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
