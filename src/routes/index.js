@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import * as healthController from '../controllers/healthController.js';
-import * as userController from '../controllers/userController.js';
 import * as authController from '../controllers/authController.js';
-import * as accountController from '../controllers/accountController.js';
 import { authenticateToken } from '../middlewares/authMiddleware.js';
+import accountRouter from './accountRoutes.js';
+import userRouter from './userRoutes.js';
 
 const router = Router();
 
@@ -18,18 +18,10 @@ router.post('/auth/logout', authController.logout);
 router.get('/auth/me', authenticateToken, authController.getCurrentUser);
 
 // User routes (protected)
-router.get('/users', authenticateToken, userController.list);
-router.post('/users', userController.create);
-router.get('/users/:id', authenticateToken, userController.getById);
-router.put('/users/:id', authenticateToken, userController.update);
-router.delete('/users/:id', authenticateToken, userController.remove);
+router.use('/', userRouter);
 
-// Account routes (protected)
-router.get('/accounts', authenticateToken, accountController.list);
-router.post('/accounts', authenticateToken, accountController.create);
-router.get('/accounts/:id', authenticateToken, accountController.getById);
-router.put('/accounts/:id', authenticateToken, accountController.update);
-router.delete('/accounts/:id', authenticateToken, accountController.remove);
+// Account routes
+router.use('/', accountRouter);
 
 router.use((req, res) => {
   res.status(404).json({ message: 'Endpoint not found' });
